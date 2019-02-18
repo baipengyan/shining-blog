@@ -103,6 +103,12 @@
     from t_users
     where uid = #{uid,jdbcType=INTEGER}
   </select>
+  <select id="selectByUserenmae" parameterType="java.lang.String" resultMap="BaseResultMap">
+    select 
+    <include refid="Base_Column_List" />
+    from t_users
+    where username = #{username,jdbcType=VARCHAR}
+  </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer">
     delete from t_users
     where uid = #{uid,jdbcType=INTEGER}

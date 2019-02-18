@@ -60,12 +60,21 @@ public class AuthController extends BaseController {
             @RequestParam String password1,
             HttpServletRequest request,
             HttpServletResponse response) {
-		try {
-			System.out.println(email+user+password+password1);
-		}catch (Exception e) {
-			// TODO: handle exception
-			String msg = "登录失败";
+		UserVo userVo=new UserVo();
+		userVo.setEmail(email);
+		userVo.setUsername(user);
+		userVo.setPassword(password);
+		UserVo userT=usersService.queryUserByName(user);
+		String msg=null;
+		if(!password.equals(password1)) {
+			msg="密码不一致，请重新输入";
+			return RestResponseBo.fail(msg);		
+		}else if(userT!=null){
+			msg="用户名已经被使用，请重新输入";
+			System.out.println(msg);
 			return RestResponseBo.fail(msg);
+		}else {
+			usersService.insertUser(userVo);
 		}
 		return RestResponseBo.ok();
 	}

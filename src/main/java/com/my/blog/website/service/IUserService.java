@@ -22,6 +22,13 @@ public interface IUserService {
      * @return
      */
     UserVo queryUserById(Integer uid);
+    
+    /**
+     * 通过username查找对象
+     * @param username
+     * @return
+     */
+    UserVo queryUserByName(String username);
 
     /**
      * 用戶登录

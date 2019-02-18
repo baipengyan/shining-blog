@@ -76,4 +76,14 @@ public class UserServiceImpl implements IUserService {
             throw new TipException("update user by uid and retrun is not one");
         }
     }
+
+	@Override
+	public UserVo queryUserByName(String username) {
+		// TODO Auto-generated method stub
+		UserVo userVo = null;
+        if (username != null) {
+            userVo = userDao.selectByUserenmae(username);
+        }
+        return userVo;
+	}
 }
