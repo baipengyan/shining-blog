@@ -10,6 +10,7 @@ import com.my.blog.website.service.ILogService;
 import com.my.blog.website.service.IUserService;
 import com.my.blog.website.utils.Commons;
 import com.my.blog.website.utils.TaleUtils;
+
 import org.apache.catalina.servlet4preview.http.HttpServletRequest;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -43,10 +44,33 @@ public class AuthController extends BaseController {
 
     @GetMapping(value = "/login")
     public String login() {
-        return "admin/login";
+        return "admin/login1";
     }
 
-    /**
+	@GetMapping(value = "/register")
+	public String register() {
+		return "admin/register";
+	}
+    
+	@PostMapping(value = "register")
+	@ResponseBody
+	public RestResponseBo doRegister(@RequestParam String email,
+			@RequestParam String user,
+            @RequestParam String password,
+            @RequestParam String password1,
+            HttpServletRequest request,
+            HttpServletResponse response) {
+		try {
+			System.out.println(email+user+password+password1);
+		}catch (Exception e) {
+			// TODO: handle exception
+			String msg = "登录失败";
+			return RestResponseBo.fail(msg);
+		}
+		return RestResponseBo.ok();
+	}
+	
+	/**
      * 管理后台登录
      * @param username
      * @param password
