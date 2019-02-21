@@ -2,6 +2,7 @@ package com.my.blog.website.controller.admin;
 
 
 import com.github.pagehelper.PageInfo;
+import com.my.blog.website.constant.WebConst;
 import com.my.blog.website.controller.BaseController;
 import com.my.blog.website.dto.LogActions;
 import com.my.blog.website.dto.Types;
@@ -55,11 +56,33 @@ public class ArticleController extends BaseController {
     public String index(@RequestParam(value = "page", defaultValue = "1") int page,
                         @RequestParam(value = "limit", defaultValue = "15") int limit, HttpServletRequest request) {
         ContentVoExample contentVoExample = new ContentVoExample();
+        UserVo user=(UserVo) request.getSession().getAttribute(WebConst.LOGIN_SESSION_KEY);
+    	Integer authorId=user.getUid();
         contentVoExample.setOrderByClause("created desc");
-        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType());
+        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(authorId);
         PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample,page,limit);
         request.setAttribute("articles", contentsPaginator);
         return "admin/article_list";
+    }
+    
+    /**
+     * 帖子列表
+     * @param page
+     * @param limit
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "/topic")
+    public String topicList(@RequestParam(value = "page", defaultValue = "1") int page,
+                        @RequestParam(value = "limit", defaultValue = "15") int limit, HttpServletRequest request) {
+        ContentVoExample contentVoExample = new ContentVoExample();
+        UserVo user=(UserVo) request.getSession().getAttribute(WebConst.LOGIN_SESSION_KEY);
+    	Integer authorId=user.getUid();
+        contentVoExample.setOrderByClause("created desc");
+        contentVoExample.createCriteria().andTypeEqualTo(Types.TOPIC.getType()).andAuthorIdEqualTo(authorId);
+        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample,page,limit);
+        request.setAttribute("articles", contentsPaginator);
+        return "admin/topic_list";
     }
 
     /**
@@ -72,6 +95,16 @@ public class ArticleController extends BaseController {
         List<MetaVo> categories = metasService.getMetas(Types.CATEGORY.getType());
         request.setAttribute("categories", categories);
         return "admin/article_edit";
+    }
+    
+    /**
+     * 帖子发表
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "/topic/publish")
+    public String newTopic(HttpServletRequest request) {
+        return "admin/topic_edit";
     }
 
     /**
@@ -88,6 +121,20 @@ public class ArticleController extends BaseController {
         request.setAttribute("categories", categories);
         request.setAttribute("active", "article");
         return "admin/article_edit";
+    }
+    
+    /**
+     * 帖子编辑
+     * @param cid
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "/topicedit/{cid}")
+    public String editTopic(@PathVariable String cid, HttpServletRequest request) {
+        ContentVo contents = contentsService.getContents(cid);
+        request.setAttribute("contents", contents);
+        request.setAttribute("active", "article");
+        return "admin/topic_edit";
     }
 
     /**
@@ -121,6 +168,36 @@ public class ArticleController extends BaseController {
     }
 
     /**
+     * 帖子发表
+     * @param contents
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "/topic/publish")
+    @ResponseBody
+    @Transactional(rollbackFor = TipException.class)
+    public RestResponseBo publishTopic(ContentVo contents,  HttpServletRequest request) {
+        UserVo users = this.user(request);
+        contents.setAuthorId(users.getUid());
+        contents.setType(Types.TOPIC.getType());
+        if (StringUtils.isBlank(contents.getCategories())) {
+            contents.setCategories("默认分类");
+        }
+        try {
+            contentsService.publishTopic(contents);
+        } catch (Exception e) {
+            String msg = "发布失败";
+            if (e instanceof TipException) {
+                msg = e.getMessage();
+            } else {
+                LOGGER.error(msg, e);
+            }
+            return RestResponseBo.fail(msg);
+        }
+        return RestResponseBo.ok();
+    }
+    
+    /**
      * 文章更新
      * @param contents
      * @param request
@@ -135,6 +212,33 @@ public class ArticleController extends BaseController {
         contents.setType(Types.ARTICLE.getType());
         try {
             contentsService.updateArticle(contents);
+        } catch (Exception e) {
+            String msg = "文章编辑失败";
+            if (e instanceof TipException) {
+                msg = e.getMessage();
+            } else {
+                LOGGER.error(msg, e);
+            }
+            return RestResponseBo.fail(msg);
+        }
+        return RestResponseBo.ok();
+    }
+    
+    /**
+     * 帖子更新
+     * @param contents
+     * @param request
+     * @return
+     */
+    @PostMapping(value = "/topic/modify")
+    @ResponseBody
+    @Transactional(rollbackFor = TipException.class)
+    public RestResponseBo modifyTopic(ContentVo contents,HttpServletRequest request) {
+        UserVo users = this.user(request);
+        contents.setAuthorId(users.getUid());
+        contents.setType(Types.TOPIC.getType());
+        try {
+            contentsService.updateTopic(contents);
         } catch (Exception e) {
             String msg = "文章编辑失败";
             if (e instanceof TipException) {

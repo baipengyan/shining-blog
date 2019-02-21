@@ -1,16 +1,20 @@
 package com.my.blog.website.controller.admin;
 
 import com.my.blog.website.service.ISiteService;
+import com.github.pagehelper.PageInfo;
 import com.my.blog.website.constant.WebConst;
 import com.my.blog.website.controller.BaseController;
 import com.my.blog.website.dto.LogActions;
+import com.my.blog.website.dto.Types;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Bo.StatisticsBo;
 import com.my.blog.website.modal.Vo.CommentVo;
 import com.my.blog.website.modal.Vo.ContentVo;
+import com.my.blog.website.modal.Vo.ContentVoExample;
 import com.my.blog.website.modal.Vo.LogVo;
 import com.my.blog.website.modal.Vo.UserVo;
+import com.my.blog.website.service.IContentService;
 import com.my.blog.website.service.ILogService;
 import com.my.blog.website.service.IUserService;
 import com.my.blog.website.utils.GsonUtils;
@@ -44,6 +48,9 @@ public class IndexController extends BaseController {
     private ILogService logService;
 
     @Resource
+    private IContentService contentsService;
+    
+    @Resource
     private IUserService userService;
 
     /**
@@ -51,19 +58,16 @@ public class IndexController extends BaseController {
      * @return
      */
     @GetMapping(value = {"","/index"})
-    public String index(HttpServletRequest request){
-        LOGGER.info("Enter admin index method");
-        List<CommentVo> comments = siteService.recentComments(5);
-        List<ContentVo> contents = siteService.recentContents(5);
-        StatisticsBo statistics = siteService.getStatistics();
-        // 取最新的20条日志
-        List<LogVo> logs = logService.getLogs(1, 5);
-
-        request.setAttribute("comments", comments);
-        request.setAttribute("articles", contents);
-        request.setAttribute("statistics", statistics);
-        request.setAttribute("logs", logs);
-        LOGGER.info("Exit admin index method");
+    public String index(@RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "limit", defaultValue = "15") int limit, HttpServletRequest request){
+    	UserVo user=(UserVo) request.getSession().getAttribute(WebConst.LOGIN_SESSION_KEY);
+    	Integer authorId=user.getUid();
+    	System.out.println("**************************"+authorId);
+    	ContentVoExample contentVoExample = new ContentVoExample();
+        contentVoExample.setOrderByClause("created desc");
+        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(authorId);
+        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample,page,limit);
+        request.setAttribute("articles", contentsPaginator);
         return "admin/index";
     }
 

@@ -62,6 +62,45 @@ function subArticle(status) {
     });
 }
 
+/**
+ * 保存帖子
+ * @param status
+ */
+function subTopic(status) {
+    var title = $('#articleForm input[name=title]').val();
+    var content = $('#text').val();
+    if (title == '') {
+        tale.alertWarn('请输入帖子标题');
+        return;
+    }
+    if (content == '') {
+        tale.alertWarn('请输入帖子内容');
+        return;
+    }
+    $('#content-editor').val(content);
+    $("#articleForm #status").val(status);
+    var params = $("#articleForm").serialize();
+    var url = $('#articleForm #cid').val() != '' ? '/admin/article/topic/modify' : '/admin/article/topic/publish';
+    tale.post({
+        url:url,
+        data:params,
+        success: function (result) {
+            if (result && result.success) {
+                tale.alertOk({
+                    text:'帖子保存成功',
+                    then: function () {
+                        setTimeout(function () {
+                            window.location.href = '/admin/article';
+                        }, 500);
+                    }
+                });
+            } else {
+                tale.alertError(result.msg || '保存帖子失败');
+            }
+        }
+    });
+}
+
 var textarea = $('#text'),
     toolbar = $('<div class="markdown-editor" id="md-button-bar" />').insertBefore(textarea.parent())
 preview = $('<div id="md-preview" class="md-hidetab" />').insertAfter('.markdown-editor');

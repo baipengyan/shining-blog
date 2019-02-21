@@ -90,4 +90,8 @@ public interface IContentService {
      * @param newCatefory
      */
     void updateCategory(String ordinal,String newCatefory);
+
+	void publishTopic(ContentVo contents);
+
+	void updateTopic(ContentVo contents);
 }

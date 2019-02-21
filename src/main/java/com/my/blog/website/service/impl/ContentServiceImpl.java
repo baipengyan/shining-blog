@@ -94,6 +94,64 @@ public class ContentServiceImpl implements IContentService {
         metasService.saveMetas(cid, tags, Types.TAG.getType());
         metasService.saveMetas(cid, categories, Types.CATEGORY.getType());
     }
+    
+    /**
+     * 帖子发表
+     * @param contents
+     * @param request
+     * @return
+     */
+    @Override
+    public void publishTopic(ContentVo contents) {
+        if (null == contents) {
+            throw new TipException("帖子对象为空");
+        }
+        if (StringUtils.isBlank(contents.getTitle())) {
+            throw new TipException("帖子标题不能为空");
+        }
+        if (StringUtils.isBlank(contents.getContent())) {
+            throw new TipException("帖子内容不能为空");
+        }
+        int titleLength = contents.getTitle().length();
+        if (titleLength > WebConst.MAX_TITLE_COUNT) {
+            throw new TipException("帖子标题过长");
+        }
+        int contentLength = contents.getContent().length();
+        if (contentLength > WebConst.MAX_TEXT_COUNT) {
+            throw new TipException("帖子内容过长");
+        }
+        if (null == contents.getAuthorId()) {
+            throw new TipException("请登录后发布帖子");
+        }
+        if (StringUtils.isNotBlank(contents.getSlug())) {
+            if (contents.getSlug().length() < 5) {
+                throw new TipException("路径太短了");
+            }
+            if (!TaleUtils.isPath(contents.getSlug())) throw new TipException("您输入的路径不合法");
+            ContentVoExample contentVoExample = new ContentVoExample();
+            contentVoExample.createCriteria().andTypeEqualTo(contents.getType()).andStatusEqualTo(contents.getSlug());
+            long count = contentDao.countByExample(contentVoExample);
+            if (count > 0) throw new TipException("该路径已经存在，请重新输入");
+        } else {
+            contents.setSlug(null);
+        }
+
+        contents.setContent(EmojiParser.parseToAliases(contents.getContent()));
+
+        int time = DateKit.getCurrentUnixTime();
+        contents.setCreated(time);
+        contents.setModified(time);
+        contents.setHits(0);
+        contents.setCommentsNum(0);
+
+        
+        contentDao.insert(contents);
+//        Integer cid = contents.getCid();
+//        String tags = contents.getTags();
+//        String categories = contents.getCategories();
+//        metasService.saveMetas(cid, tags, Types.TAG.getType());
+//        metasService.saveMetas(cid, categories, Types.CATEGORY.getType());
+    }
 
     @Override
     public PageInfo<ContentVo> getContents(Integer p, Integer limit) {
@@ -218,5 +276,39 @@ public class ContentServiceImpl implements IContentService {
         relationshipService.deleteById(cid, null);
         metasService.saveMetas(cid, contents.getTags(), Types.TAG.getType());
         metasService.saveMetas(cid, contents.getCategories(), Types.CATEGORY.getType());
+    }
+    
+    @Override
+    public void updateTopic(ContentVo contents) {
+        if (null == contents || null == contents.getCid()) {
+            throw new TipException("帖子对象不能为空");
+        }
+        if (StringUtils.isBlank(contents.getTitle())) {
+            throw new TipException("帖子标题不能为空");
+        }
+        if (StringUtils.isBlank(contents.getContent())) {
+            throw new TipException("帖子内容不能为空");
+        }
+        if (contents.getTitle().length() > 200) {
+            throw new TipException("帖子标题过长");
+        }
+        if (contents.getContent().length() > 65000) {
+            throw new TipException("帖子内容过长");
+        }
+        if (null == contents.getAuthorId()) {
+            throw new TipException("请登录后发布帖子");
+        }
+        if (StringUtils.isBlank(contents.getSlug())) {
+            contents.setSlug(null);
+        }
+        int time = DateKit.getCurrentUnixTime();
+        contents.setModified(time);
+        contents.setContent(EmojiParser.parseToAliases(contents.getContent()));
+
+        contentDao.updateByPrimaryKeySelective(contents);
+//        Integer cid = contents.getCid();
+//        relationshipService.deleteById(cid, null);
+//        metasService.saveMetas(cid, contents.getTags(), Types.TAG.getType());
+//        metasService.saveMetas(cid, contents.getCategories(), Types.CATEGORY.getType());
     }
 }

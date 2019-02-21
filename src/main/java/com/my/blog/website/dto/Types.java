@@ -4,6 +4,7 @@ public enum Types {
     TAG("tag"),
     CATEGORY("category"),
     ARTICLE("post"),
+    TOPIC("topic"),
     PUBLISH("publish"),
     PAGE("page"),
     DRAFT("draft"),
