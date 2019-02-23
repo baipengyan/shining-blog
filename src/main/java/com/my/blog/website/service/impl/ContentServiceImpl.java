@@ -165,6 +165,19 @@ public class ContentServiceImpl implements IContentService {
         LOGGER.debug("Exit getContents method");
         return pageInfo;
     }
+    
+    @Override
+    public PageInfo<ContentVo> getContentsByUid(Integer p, Integer limit,Integer uid) {
+        LOGGER.debug("Enter getContents method");
+        ContentVoExample example = new ContentVoExample();
+        example.setOrderByClause("created desc");
+        example.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andStatusEqualTo(Types.PUBLISH.getType()).andAuthorIdEqualTo(uid);
+        PageHelper.startPage(p, limit);
+        List<ContentVo> data = contentDao.selectByExampleWithBLOBs(example);
+        PageInfo<ContentVo> pageInfo = new PageInfo<>(data);
+        LOGGER.debug("Exit getContents method");
+        return pageInfo;
+    }
 
     @Override
     public ContentVo getContents(String id) {

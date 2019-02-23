@@ -1,11 +1,14 @@
 package com.my.blog.website.controller.admin;
 
+import com.github.pagehelper.PageInfo;
 import com.my.blog.website.constant.WebConst;
 import com.my.blog.website.controller.BaseController;
 import com.my.blog.website.dto.LogActions;
 import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
+import com.my.blog.website.modal.Vo.ContentVo;
 import com.my.blog.website.modal.Vo.UserVo;
+import com.my.blog.website.service.IContentService;
 import com.my.blog.website.service.ILogService;
 import com.my.blog.website.service.IUserService;
 import com.my.blog.website.utils.Commons;
@@ -39,6 +42,9 @@ public class AuthController extends BaseController {
     @Resource
     private IUserService usersService;
 
+    @Resource
+    private IContentService contentService;
+    
     @Resource
     private ILogService logService;
 
@@ -139,5 +145,35 @@ public class AuthController extends BaseController {
             e.printStackTrace();
             LOGGER.error("注销失败", e);
         }
+    }
+    
+    /**
+     * 用户文章首页
+     *
+     * @return
+     */
+    @GetMapping(value = "/auth/articel")
+    public String authArticel(HttpServletRequest request, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+        return this.authArticel(request, 1, limit);
+    }
+    
+    /**
+     * 用户文章首页分页
+     *
+     * @param request request
+     * @param p       第几页
+     * @param limit   每页大小
+     * @return 主页
+     */
+    @GetMapping(value = "/auth/articel/page/{p}")
+    public String authArticel(HttpServletRequest request, @PathVariable int p, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+        p = p < 0 || p > WebConst.MAX_PAGE ? 1 : p;
+        Integer uid=this.getUid(request);
+        PageInfo<ContentVo> articles = contentService.getContentsByUid(p, limit, uid);
+        request.setAttribute("articles", articles);
+        if (p > 1) {
+            this.title(request, "第" + p + "页");
+        }
+        return this.render("articel_list");
     }
 }
