@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="comments">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:fragment="message">
 <body>
 <div th:if="${article}!=null">
     <div th:id="${article.cid ?: 0}" class="comment-container">
@@ -30,11 +30,11 @@
                     <textarea name="text" id="textarea" class="form-control" placeholder="以上信息可以为空,评论不能为空哦!"
                               required="required" minlength="5"
                               maxlength="2000"></textarea>
-                    <button type="submit" class="submit" id="misubmit">提交</button>
+                    
+                    <button type="submit" class="report" id="missbmit">举报</button>
+                    <button type="submit" class="submit" id="misubmit">留言</button>
+                    
                 </form>
-            </div>
-            <div th:unless="${article.allowComment}">
-                <span class="response">评论已关闭.</span>
             </div>
         </div>
     </div>

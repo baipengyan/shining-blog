@@ -6,6 +6,7 @@ import com.my.blog.website.dao.AttachVoMapper;
 import com.my.blog.website.utils.DateKit;
 import com.my.blog.website.modal.Vo.AttachVo;
 import com.my.blog.website.modal.Vo.AttachVoExample;
+import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.service.IAttachService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,10 +26,11 @@ public class AttachServiceImpl implements IAttachService {
     private AttachVoMapper attachDao;
 
     @Override
-    public PageInfo<AttachVo> getAttachs(Integer page, Integer limit) {
+    public PageInfo<AttachVo> getAttachs(Integer page, Integer limit,UserVo users) {
         PageHelper.startPage(page, limit);
         AttachVoExample attachVoExample = new AttachVoExample();
         attachVoExample.setOrderByClause("id desc");
+        attachVoExample.createCriteria().andAuthorIdEqualTo(users.getUid());
         List<AttachVo> attachVos = attachDao.selectByExample(attachVoExample);
         return new PageInfo<>(attachVos);
     }

@@ -22,6 +22,8 @@ public class WebConst {
 
     public static String LOGIN_SESSION_KEY = "login_user";
 
+    public static String ARTICEL_AUTH_KEY = "articel_auth";
+    
     public static final String USER_IN_COOKIE = "S_L_ID";
 
     /**

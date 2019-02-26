@@ -2,6 +2,7 @@ package com.my.blog.website.service;
 
 import com.github.pagehelper.PageInfo;
 import com.my.blog.website.modal.Vo.AttachVo;
+import com.my.blog.website.modal.Vo.UserVo;
 
 /**
  * Created by wangq on 2017/3/20.
@@ -11,9 +12,10 @@ public interface IAttachService {
      * 分页查询附件
      * @param page
      * @param limit
+     * @param users 
      * @return
      */
-    PageInfo<AttachVo> getAttachs(Integer page,Integer limit);
+    PageInfo<AttachVo> getAttachs(Integer page,Integer limit, UserVo users);
 
     /**
      * 保存附件

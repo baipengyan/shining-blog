@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:yh="http://www.thymeleaf.org">
 <head>
     <meta charset="utf-8"/>
     <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
@@ -9,32 +9,42 @@
     <meta http-equiv="Cache-Control" content="no-siteapp"/>
     <link rel="shortcut icon" th:href="@{/user/img/favicon.png}"/>
     <link rel="apple-touch-icon" th:href="@{/user/img/apple-touch-icon.png}"/>
-    <title>网站公告</title>
     <link th:href="@{//cdn.bootcss.com/highlight.js/9.9.0/styles/xcode.min.css}" rel="stylesheet"/>
     <link th:href="@{/user/css/style.min.css}" rel="stylesheet"/>
     <script th:src="@{//cdn.bootcss.com/jquery/2.2.3/jquery.min.js}"></script>
-    <!--[if lt IE 9]>
-    <script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
-    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
-    <![endif]-->
 </head>
 <body>
 <header id="header" class="header bg-white">
     <div class="navbar-container">
-        <a  class="navbar-logo">
+        <a class="navbar-logo">
             <img th:src="@{/user/img/logo.png}" alt="首页"/>
         </a>
-    </div>
-</header>
-<article class="main-content post-page">
-    <div class="post-header">
-        <h1 class="post-title" itemprop="name headline" th:text="${article.title}"></h1>
-        <div class="post-data">
-            <time th:datetime="${commons.fmtdate(article.created)}" itemprop="datePublished" th:text="'发布于 '+ ${commons.fmtdate(article.created)}"></time>
+        <div class="navbar-menu">
+            <a th:href="${commons.authlink(article)}">作者</a>
         </div>
     </div>
-    <div id="post-content" class="post-content" th:utext="${commons.article(article.content)}"></div>
+</header>
+<article class="main-content post-page" itemscope="" itemtype="http://schema.org/Article">
+    <div class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+            <a id ="titles" th:href="${commons.permalink(article)}" th:text="${article.title}" data-no-instant=""></a>
+        </h1>
+        <div class="post-data">
+            <time th:datetime="${commons.fmtdate(article.created)}" itemprop="datePublished" th:text="'发布于 '+ ${commons.fmtdate(article.created)}"></time>
+            / <th:block th:utext="${commons.show_categories(article.categories)}"/> / 
+            <th:block th:text="${article.hits}"/>浏览
+        </div>
+    </div>
+    <div id="post-content" class="post-content" itemprop="articleBody">
+        <p class="post-tags" th:utext="${commons.show_tags(article.tags)}"></p>
+        <th:block th:utext="${commons.article(article.content)}"/>
+        <p class="post-info">
+            本站文章除注明转载/出处外，均为本站原创或翻译，转载前请务必署名,转载请标明出处<br/>最后编辑时间为:
+            <th:block th:text="${commons.fmtdate(article.modified, 'yyyy/MM/dd HH:mm')}"/>
+        </p>
+    </div>
 </article>
+<div th:replace="themes/default/message::message"></div>
 <div th:replace="themes/default/footer::footer"></div>
 </body>
 </html>

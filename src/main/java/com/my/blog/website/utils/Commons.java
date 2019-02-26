@@ -176,6 +176,16 @@ public final class Commons {
     public static String permalink(ContentVo contents) {
         return permalink(contents.getCid(), contents.getSlug());
     }
+    
+    /**
+     * 返回文章链接地址
+     *
+     * @param contents
+     * @return
+     */
+    public static String authlink(ContentVo contents) {
+    	return site_url("/auth/articel/" + ((contents.getAuthorId()).toString()));
+    }
 
 
     /**

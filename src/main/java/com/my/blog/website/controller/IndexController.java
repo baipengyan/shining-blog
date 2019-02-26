@@ -10,6 +10,7 @@ import com.my.blog.website.modal.Bo.ArchiveBo;
 import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Vo.CommentVo;
 import com.my.blog.website.modal.Vo.MetaVo;
+import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.service.IMetaService;
 import com.my.blog.website.service.ISiteService;
 import com.my.blog.website.utils.PatternKit;
@@ -61,28 +62,30 @@ public class IndexController extends BaseController {
      * @return
      */
     @GetMapping(value = {"/", "index"})
-    public String index(HttpServletRequest request, @RequestParam(value = "limit", defaultValue = "12") int limit) {
-        return this.index(request, 1, limit);
-    }
-
-    /**
-     * 首页分页
-     *
-     * @param request request
-     * @param p       第几页
-     * @param limit   每页大小
-     * @return 主页
-     */
-    @GetMapping(value = "page/{p}")
-    public String index(HttpServletRequest request, @PathVariable int p, @RequestParam(value = "limit", defaultValue = "12") int limit) {
-        p = p < 0 || p > WebConst.MAX_PAGE ? 1 : p;
-        PageInfo<ContentVo> articles = contentService.getContents(p, limit);
+    public String index(HttpServletRequest request) {
+        PageInfo<ContentVo> articles = contentService.getContents(1, 12);
         request.setAttribute("articles", articles);
-        if (p > 1) {
-            this.title(request, "第" + p + "页");
-        }
         return this.render("index");
     }
+
+//    /**
+//     * 首页分页
+//     *
+//     * @param request request
+//     * @param p       第几页
+//     * @param limit   每页大小
+//     * @return 主页
+//     */
+//    @GetMapping(value = "page/{p}")
+//    public String index(HttpServletRequest request, @PathVariable int p, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+//        p = p < 0 || p > WebConst.MAX_PAGE ? 1 : p;
+//        PageInfo<ContentVo> articles = contentService.getContents(p, limit);
+//        request.setAttribute("articles", articles);
+//        if (p > 1) {
+//            this.title(request, "第" + p + "页");
+//        }
+//        return this.render("index");
+//    }
 
     /**
      * 文章页
@@ -101,9 +104,46 @@ public class IndexController extends BaseController {
         request.setAttribute("is_post", true);
         completeArticle(request, contents);
         updateArticleHit(contents.getCid(), contents.getHits());
-        return this.render("post");
+        if(contents.getType().equals("post")) {
+        	return this.render("page_articel");
+        }else {
+        	return this.render("post");
+		}
+        
     }
 
+    /**
+     * 用户文章首页
+     *
+     * @return
+     */
+    @GetMapping(value = "/auth/articel/{authorId}")
+    public String authArticel(HttpServletRequest request, @PathVariable String authorId) {
+    	UserVo user=new UserVo();
+    	user.setUid(Integer.valueOf(authorId));
+    	request.getSession().setAttribute(WebConst.ARTICEL_AUTH_KEY, user);
+    	return this.authArticel(request, 1, 12);
+    }
+    
+    /**
+     * 用户文章首页分页
+     *
+     * @param request request
+     * @param p       第几页
+     * @param limit   每页大小
+     * @return 主页
+     */
+    @GetMapping(value = "/auth/articel/page/{p}")
+    public String authArticel(HttpServletRequest request, @PathVariable int p, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+        p = p < 0 || p > WebConst.MAX_PAGE ? 1 : p;
+        Integer uid=((UserVo)(request.getSession().getAttribute(WebConst.ARTICEL_AUTH_KEY))).getUid();
+        PageInfo<ContentVo> articles = contentService.getContentsByUid(p, limit, uid);
+        request.setAttribute("articles", articles);
+        if (p > 1) {
+            this.title(request, "第" + p + "页");
+        }
+        return this.render("auth_articel");
+    }
     /**
      * 文章页(预览)
      *
@@ -234,8 +274,173 @@ public class IndexController extends BaseController {
             return RestResponseBo.fail(msg);
         }
     }
+    
+    /**
+     * 留言操作
+     */
+    @PostMapping(value = "message")
+    @ResponseBody
+    @Transactional(rollbackFor = TipException.class)
+    public RestResponseBo message(HttpServletRequest request, HttpServletResponse response,
+                                  @RequestParam Integer cid, @RequestParam Integer coid,
+                                  @RequestParam String author, @RequestParam String mail,
+                                  @RequestParam String url, @RequestParam String text, @RequestParam String _csrf_token) {
 
+        String ref = request.getHeader("Referer");
+        if (StringUtils.isBlank(ref) || StringUtils.isBlank(_csrf_token)) {
+            return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
+        }
 
+        String token = cache.hget(Types.CSRF_TOKEN.getType(), _csrf_token);
+        if (StringUtils.isBlank(token)) {
+            return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
+        }
+
+        if (null == cid || StringUtils.isBlank(text)) {
+            return RestResponseBo.fail("请输入完整后留言");
+        }
+
+        if (StringUtils.isNotBlank(author) && author.length() > 50) {
+            return RestResponseBo.fail("姓名过长");
+        }
+
+        if (StringUtils.isNotBlank(mail) && !TaleUtils.isEmail(mail)) {
+            return RestResponseBo.fail("请输入正确的邮箱格式");
+        }
+
+        if (StringUtils.isNotBlank(url) && !PatternKit.isURL(url)) {
+            return RestResponseBo.fail("请输入正确的URL格式");
+        }
+
+        if (text.length() > 200) {
+            return RestResponseBo.fail("请输入200个字符以内的留言");
+        }
+
+        String val = IPKit.getIpAddrByRequest(request) + ":" + cid;
+        Integer count = cache.hget(Types.COMMENTS_FREQUENCY.getType(), val);
+        if (null != count && count > 0) {
+            return RestResponseBo.fail("您留言太频繁了，请过会再试");
+        }
+
+        author = TaleUtils.cleanXSS(author);
+        text = TaleUtils.cleanXSS(text);
+
+        author = EmojiParser.parseToAliases(author);
+        text = EmojiParser.parseToAliases(text);
+
+        CommentVo comments = new CommentVo();
+        comments.setAuthor(author);
+        comments.setCid(cid);
+        comments.setIp(request.getRemoteAddr());
+        comments.setUrl(url);
+        comments.setContent(text);
+        comments.setMail(mail);
+        comments.setParent(coid);
+        comments.setType("message");
+        try {
+            commentService.insertComment(comments);
+            cookie("tale_remember_author", URLEncoder.encode(author, "UTF-8"), 7 * 24 * 60 * 60, response);
+            cookie("tale_remember_mail", URLEncoder.encode(mail, "UTF-8"), 7 * 24 * 60 * 60, response);
+            if (StringUtils.isNotBlank(url)) {
+                cookie("tale_remember_url", URLEncoder.encode(url, "UTF-8"), 7 * 24 * 60 * 60, response);
+            }
+            // 设置对每个文章1分钟可以留言一次
+            cache.hset(Types.COMMENTS_FREQUENCY.getType(), val, 1, 60);
+            return RestResponseBo.ok();
+        } catch (Exception e) {
+            String msg = "留言发布失败";
+            if (e instanceof TipException) {
+                msg = e.getMessage();
+            } else {
+                LOGGER.error(msg, e);
+            }
+            return RestResponseBo.fail(msg);
+        }
+    }
+
+    /**
+     * 举报操作
+     */
+    @PostMapping(value = "report")
+    @ResponseBody
+    @Transactional(rollbackFor = TipException.class)
+    public RestResponseBo report(HttpServletRequest request, HttpServletResponse response,
+                                  @RequestParam Integer cid, @RequestParam Integer coid,
+                                  @RequestParam String author, @RequestParam String mail,
+                                  @RequestParam String url, @RequestParam String text, @RequestParam String _csrf_token) {
+
+        String ref = request.getHeader("Referer");
+        if (StringUtils.isBlank(ref) || StringUtils.isBlank(_csrf_token)) {
+            return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
+        }
+
+        String token = cache.hget(Types.CSRF_TOKEN.getType(), _csrf_token);
+        if (StringUtils.isBlank(token)) {
+            return RestResponseBo.fail(ErrorCode.BAD_REQUEST);
+        }
+
+        if (null == cid || StringUtils.isBlank(text)) {
+            return RestResponseBo.fail("请输入完整后举报");
+        }
+
+        if (StringUtils.isNotBlank(author) && author.length() > 50) {
+            return RestResponseBo.fail("姓名过长");
+        }
+
+        if (StringUtils.isNotBlank(mail) && !TaleUtils.isEmail(mail)) {
+            return RestResponseBo.fail("请输入正确的邮箱格式");
+        }
+
+        if (StringUtils.isNotBlank(url) && !PatternKit.isURL(url)) {
+            return RestResponseBo.fail("请输入正确的URL格式");
+        }
+
+        if (text.length() > 200) {
+            return RestResponseBo.fail("请输入200个字符以内的留言");
+        }
+
+        String val = IPKit.getIpAddrByRequest(request) + ":" + cid;
+        Integer count = cache.hget(Types.COMMENTS_FREQUENCY.getType(), val);
+        if (null != count && count > 0) {
+            return RestResponseBo.fail("您举报太频繁了，请过会再试");
+        }
+
+        author = TaleUtils.cleanXSS(author);
+        text = TaleUtils.cleanXSS(text);
+
+        author = EmojiParser.parseToAliases(author);
+        text = EmojiParser.parseToAliases(text);
+
+        CommentVo comments = new CommentVo();
+        comments.setAuthor(author);
+        comments.setCid(cid);
+        comments.setIp(request.getRemoteAddr());
+        comments.setUrl(url);
+        comments.setContent(text);
+        comments.setMail(mail);
+        comments.setParent(coid);
+        comments.setType("report");
+        try {
+            commentService.insertComment(comments);
+            cookie("tale_remember_author", URLEncoder.encode(author, "UTF-8"), 7 * 24 * 60 * 60, response);
+            cookie("tale_remember_mail", URLEncoder.encode(mail, "UTF-8"), 7 * 24 * 60 * 60, response);
+            if (StringUtils.isNotBlank(url)) {
+                cookie("tale_remember_url", URLEncoder.encode(url, "UTF-8"), 7 * 24 * 60 * 60, response);
+            }
+            // 设置对每个文章1分钟可以留言一次
+            cache.hset(Types.COMMENTS_FREQUENCY.getType(), val, 1, 60);
+            return RestResponseBo.ok();
+        } catch (Exception e) {
+            String msg = "举报发布失败";
+            if (e instanceof TipException) {
+                msg = e.getMessage();
+            } else {
+                LOGGER.error(msg, e);
+            }
+            return RestResponseBo.fail(msg);
+        }
+    }
+    
     /**
      * 分类页
      *
@@ -312,6 +517,20 @@ public class IndexController extends BaseController {
         return this.render("page");
     }
 
+    /**
+     * 公告页面
+     */
+    @GetMapping(value = "/announ")
+    public String announcement(HttpServletRequest request) {
+    	String pagename="about";
+        ContentVo contents = contentService.getContents(pagename);
+        if (null == contents) {
+            return this.render_404();
+        }
+        request.setAttribute("article", contents);
+        updateArticleHit(contents.getCid(), contents.getHits());
+        return this.render("page");
+    }
 
     /**
      * 搜索页

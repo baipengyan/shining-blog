@@ -1522,6 +1522,32 @@ input:-ms-input-placeholder, textarea:-ms-input-placeholder {
 	background-color: #f7f7f7
 }
 
+.comment-form .report {
+	font-size: 13px;
+	position: absolute;
+	right: 95px;
+	bottom: 20px;
+	display: block;
+	height: 32px;
+	margin: 0 auto;
+	padding: 0 20px;
+	-webkit-transition-duration: .4s;
+	transition-duration: .4s;
+	text-align: center;
+	color: #313131;
+	border: 1px solid #f7f7f7;
+	border-radius: 30px;
+	background-color: #f7f7f7
+}
+
+.comment-form .report:hover, .report:active, .report:active:focus,
+	.report:focus {
+	color: #6fa3ef;
+	border: 1px solid #6fa3ef;
+	outline-style: none;
+	background-color: #fff
+}
+
 .comment-form .submit:hover, .submit:active, .submit:active:focus,
 	.submit:focus {
 	color: #6fa3ef;
