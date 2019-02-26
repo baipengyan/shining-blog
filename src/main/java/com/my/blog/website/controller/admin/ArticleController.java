@@ -14,7 +14,6 @@ import com.my.blog.website.modal.Vo.MetaVo;
 import com.my.blog.website.modal.Vo.UserVo;
 import com.my.blog.website.service.IContentService;
 import com.my.blog.website.service.ILogService;
-import com.my.blog.website.service.IMetaService;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,9 +37,6 @@ public class ArticleController extends BaseController {
 
     @Resource
     private IContentService contentsService;
-
-    @Resource
-    private IMetaService metasService;
 
     @Resource
     private ILogService logService;
@@ -92,8 +88,6 @@ public class ArticleController extends BaseController {
      */
     @GetMapping(value = "/publish")
     public String newArticle(HttpServletRequest request) {
-        List<MetaVo> categories = metasService.getMetas(Types.CATEGORY.getType());
-        request.setAttribute("categories", categories);
         return "admin/article_edit";
     }
     
@@ -117,8 +111,6 @@ public class ArticleController extends BaseController {
     public String editArticle(@PathVariable String cid, HttpServletRequest request) {
         ContentVo contents = contentsService.getContents(cid);
         request.setAttribute("contents", contents);
-        List<MetaVo> categories = metasService.getMetas(Types.CATEGORY.getType());
-        request.setAttribute("categories", categories);
         request.setAttribute("active", "article");
         return "admin/article_edit";
     }
@@ -150,7 +142,7 @@ public class ArticleController extends BaseController {
         UserVo users = this.user(request);
         contents.setAuthorId(users.getUid());
         contents.setType(Types.ARTICLE.getType());
-        if (StringUtils.isBlank(contents.getCategories())) {
+        if (StringUtils.isBlank(contents.getCategories())||contents.getCategories().equals(",")) {
             contents.setCategories("默认分类");
         }
         try {
@@ -180,6 +172,7 @@ public class ArticleController extends BaseController {
         UserVo users = this.user(request);
         contents.setAuthorId(users.getUid());
         contents.setType(Types.TOPIC.getType());
+        contents.setAllowComment(true);
         if (StringUtils.isBlank(contents.getCategories())) {
             contents.setCategories("默认分类");
         }

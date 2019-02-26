@@ -63,5 +63,30 @@
 		</div>
 	</div>
 	<div th:replace="admin/footer :: footer"></div>
+	<script type="text/javascript">
+		/*<![CDATA[*/
+		var tale = new $.tale();
+		function delPost(cid) {
+			tale.alertConfirm({
+				title : '确定删除该文章吗?',
+				then : function() {
+					tale.post({
+						url : '/admin/article/delete',
+						data : {
+							cid : cid
+						},
+						success : function(result) {
+							if (result && result.success) {
+								tale.alertOkAndReload('文章删除成功');
+							} else {
+								tale.alertError(result.msg || '文章删除失败');
+							}
+						}
+					});
+				}
+			});
+		}
+		/*]]>*/
+	</script>
 </body>
 </html>

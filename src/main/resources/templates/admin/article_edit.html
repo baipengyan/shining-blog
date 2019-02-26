@@ -65,45 +65,48 @@
                             </div>
 
                             <div class="form-group col-md-6">
-                                <select id="multiple-sel" class="select2 form-control" multiple="multiple" data-placeholder="请选择分类...">
-                                    <th:block th:if="${null == categories}">
-                                        <option value="默认分类" selected="selected">默认分类</option>
-                                    </th:block>
-                                    <th:block th:unless="${null == categories}">
-                                        <th:block th:each="c : ${categories}">
-                                            <option th:value="${c.name}" th:text="${c.name}"  th:selected="${null !=contents and adminCommons.exist_cat(c, contents.categories)}?true:false" ></option>
-                                        </th:block>
-                                    </th:block>
-                                </select>
+                            	<input name="categories" id="multiple-sel" type="text" class="form-control" placeholder="请填写文章分类"
+                                       th:value="${contents!=null and contents.categories !=null}?${contents.categories}: ''"/>
+                                       
+<!--                                 <select id="multiple-sel" class="select2 form-control" multiple="multiple"> -->
+<!--                                     <th:block th:if="${null == categories}"> -->
+<!--                                         <option value="默认分类" selected="selected">默认分类</option> -->
+<!--                                     </th:block> -->
+<!--                                     <th:block th:unless="${null == categories}"> -->
+<!--                                         <th:block th:each="c : ${categories}"> -->
+<!--                                             <option th:value="${c.name}" th:text="${c.name}"  th:selected="${null !=contents and adminCommons.exist_cat(c, contents.categories)}?true:false" ></option> -->
+<!--                                         </th:block> -->
+<!--                                     </th:block> -->
+<!--                                 </select> -->
                             </div>
                             <div class="clearfix"></div>
                             <div class="form-group">
                                 <textarea style="height: 450px" autocomplete="off" id="text" name="text" class="markdown-textarea" th:utext="${contents!=null and contents.content !=null}?${contents.content}: ''"></textarea>
                             </div>
 
-                            <div class="form-group col-md-3 col-sm-4">
-                                <label class="col-sm-4">开启评论</label>
-                                <div class="col-sm-8">
-                                    <div th:class="${contents!=null and contents.allowComment!=null }?'toggle toggle-success allow-'+${contents.allowComment}:'toggle toggle-success allow-true'"
-                                         onclick="allowComment(this);"></div>
-                                </div>
-                            </div>
+<!--                             <div class="form-group col-md-3 col-sm-4"> -->
+<!--                                 <label class="col-sm-4">开启评论</label> -->
+<!--                                 <div class="col-sm-8"> -->
+<!--                                     <div th:class="${contents!=null and contents.allowComment!=null }?'toggle toggle-success allow-'+${contents.allowComment}:'toggle toggle-success allow-true'" -->
+<!--                                          onclick="allowComment(this);"></div> -->
+<!--                                 </div> -->
+<!--                             </div> -->
 
-                            <div class="form-group col-md-3 col-sm-4">
-                                <label class="col-sm-4">允许Ping</label>
-                                <div class="col-sm-8">
-                                    <div th:class="${contents!=null and contents.allowPing !=null}?'toggle toggle-success allow-'+${contents.allowPing}:'toggle toggle-success allow-true'"
-                                         onclick="allowPing(this);"></div>
-                                </div>
-                            </div>
+<!--                             <div class="form-group col-md-3 col-sm-4"> -->
+<!--                                 <label class="col-sm-4">允许Ping</label> -->
+<!--                                 <div class="col-sm-8"> -->
+<!--                                     <div th:class="${contents!=null and contents.allowPing !=null}?'toggle toggle-success allow-'+${contents.allowPing}:'toggle toggle-success allow-true'" -->
+<!--                                          onclick="allowPing(this);"></div> -->
+<!--                                 </div> -->
+<!--                             </div> -->
 
-                            <div class="form-group col-md-3 col-sm-4">
-                                <label class="col-sm-4">允许订阅</label>
-                                <div class="col-sm-8">
-                                    <div th:class="${contents!=null and  contents.allowFeed !=null}?'toggle toggle-success allow-'+${contents.allowFeed}: 'toggle toggle-success allow-true'"
-                                         onclick="allowFeed(this);"></div>
-                                </div>
-                            </div>
+<!--                             <div class="form-group col-md-3 col-sm-4"> -->
+<!--                                 <label class="col-sm-4">允许订阅</label> -->
+<!--                                 <div class="col-sm-8"> -->
+<!--                                     <div th:class="${contents!=null and  contents.allowFeed !=null}?'toggle toggle-success allow-'+${contents.allowFeed}: 'toggle toggle-success allow-true'" -->
+<!--                                          onclick="allowFeed(this);"></div> -->
+<!--                                 </div> -->
+<!--                             </div> -->
 
                             <div class="clearfix"></div>
 

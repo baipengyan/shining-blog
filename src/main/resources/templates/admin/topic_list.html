@@ -26,7 +26,7 @@
                             <th:block th:each="post : ${articles.list}">
                                 <tr th:cid="${post.cid}">
                                     <td>
-                                        <a th:href="@{'/admin/article/'+${post.cid}}" th:text="${post.title}"></a>
+                                        <a th:text="${post.title}"></a>
                                     </td>
                                     <td><th:block th:text="${commons.fmtdate(post.created, 'yyyy-MM-dd HH:mm:ss')}"/></td>
                                     <td><th:block th:text="${post.hits}"/></td>

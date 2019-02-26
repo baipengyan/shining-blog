@@ -11,7 +11,6 @@ import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Vo.CommentVo;
 import com.my.blog.website.modal.Vo.MetaVo;
 import com.my.blog.website.modal.Vo.UserVo;
-import com.my.blog.website.service.IMetaService;
 import com.my.blog.website.service.ISiteService;
 import com.my.blog.website.utils.PatternKit;
 import com.my.blog.website.utils.TaleUtils;
@@ -51,9 +50,6 @@ public class IndexController extends BaseController {
     private ICommentService commentService;
 
     @Resource
-    private IMetaService metaService;
-
-    @Resource
     private ISiteService siteService;
 
     /**
@@ -64,10 +60,39 @@ public class IndexController extends BaseController {
     @GetMapping(value = {"/", "index"})
     public String index(HttpServletRequest request) {
         PageInfo<ContentVo> articles = contentService.getContents(1, 12);
+        PageInfo<ContentVo> hitArticles = contentService.getContentsByHits(1, 2);
         request.setAttribute("articles", articles);
+        request.setAttribute("hitArticles", hitArticles);
         return this.render("index");
     }
+    
+    @GetMapping(value = {"/topic"})
+    public String topic(HttpServletRequest request) {
+        return this.topicIndex(request, 1, 12);
+    }
 
+    
+    @GetMapping(value = "/topic/page/{p}")
+    public String topicIndex(HttpServletRequest request, @PathVariable int p, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+        p = p < 0 || p > WebConst.MAX_PAGE ? 1 : p;
+        PageInfo<ContentVo> topic = contentService.getTopic(p, limit);
+        request.setAttribute("topic", topic);
+        return this.render("topic");
+    }
+    
+    @GetMapping(value = {"/hotHit"})
+    public String hotHit(HttpServletRequest request) {
+        return this.hotHitIndex(request, 1, 12);
+    }
+
+    
+    @GetMapping(value = "/hotHit/page/{p}")
+    public String hotHitIndex(HttpServletRequest request, @PathVariable int p, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+        p = p < 0 || p > WebConst.MAX_PAGE ? 1 : p;
+        PageInfo<ContentVo> topic = contentService.getContentsByHits(p, limit);
+        request.setAttribute("topic", topic);
+        return this.render("hot");
+    }
 //    /**
 //     * 首页分页
 //     *
@@ -441,34 +466,33 @@ public class IndexController extends BaseController {
         }
     }
     
-    /**
-     * 分类页
-     *
-     * @return
-     */
-    @GetMapping(value = "category/{keyword}")
-    public String categories(HttpServletRequest request, @PathVariable String keyword, @RequestParam(value = "limit", defaultValue = "12") int limit) {
-        return this.categories(request, keyword, 1, limit);
-    }
-
-    @GetMapping(value = "category/{keyword}/{page}")
-    public String categories(HttpServletRequest request, @PathVariable String keyword,
-                             @PathVariable int page, @RequestParam(value = "limit", defaultValue = "12") int limit) {
-        page = page < 0 || page > WebConst.MAX_PAGE ? 1 : page;
-        MetaDto metaDto = metaService.getMeta(Types.CATEGORY.getType(), keyword);
-        if (null == metaDto) {
-            return this.render_404();
-        }
-
-        PageInfo<ContentVo> contentsPaginator = contentService.getArticles(metaDto.getMid(), page, limit);
-
-        request.setAttribute("articles", contentsPaginator);
-        request.setAttribute("meta", metaDto);
-        request.setAttribute("type", "分类");
-        request.setAttribute("keyword", keyword);
-
-        return this.render("page-category");
-    }
+//    /**
+//     * 分类页
+//     *
+//     * @return
+//     */
+//    @GetMapping(value = "category/{keyword}")
+//    public String categories(HttpServletRequest request, @PathVariable String keyword, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+//        return this.categories(request, keyword, 1, limit);
+//    }
+//
+//    @GetMapping(value = "category/{keyword}/{page}")
+//    public String categories(HttpServletRequest request, @PathVariable String keyword,
+//                             @PathVariable int page, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+//        page = page < 0 || page > WebConst.MAX_PAGE ? 1 : page;
+//        if (null == metaDto) {
+//            return this.render_404();
+//        }
+//
+//        PageInfo<ContentVo> contentsPaginator = contentService.getArticles(metaDto.getMid(), page, limit);
+//
+//        request.setAttribute("articles", contentsPaginator);
+//        request.setAttribute("meta", metaDto);
+//        request.setAttribute("type", "分类");
+//        request.setAttribute("keyword", keyword);
+//
+//        return this.render("page-category");
+//    }
 
 
     /**
@@ -481,18 +505,6 @@ public class IndexController extends BaseController {
         List<ArchiveBo> archives = siteService.getArchives();
         request.setAttribute("archives", archives);
         return this.render("archives");
-    }
-
-    /**
-     * 友链页
-     *
-     * @return
-     */
-    @GetMapping(value = "links")
-    public String links(HttpServletRequest request) {
-        List<MetaVo> links = metaService.getMetas(Types.LINK.getType());
-        request.setAttribute("links", links);
-        return this.render("links");
     }
 
     /**
@@ -553,6 +565,16 @@ public class IndexController extends BaseController {
         return this.render("page-category");
     }
 
+    @GetMapping(value = "category/{keyword}")
+    public String category(HttpServletRequest request, @PathVariable String keyword, @RequestParam(value = "limit", defaultValue = "12") int limit) {
+        
+    	PageInfo<ContentVo> articles = contentService.getArticles(keyword, 1, limit);
+        request.setAttribute("articles", articles);
+        request.setAttribute("type", "搜索");
+        request.setAttribute("keyword", keyword);
+        return this.render("page-category");
+    }
+    
     /**
      * 更新文章的点击率
      *
@@ -575,46 +597,6 @@ public class IndexController extends BaseController {
         } else {
             cache.hset("article", "hits", hits);
         }
-    }
-
-    /**
-     * 标签页
-     *
-     * @param name
-     * @return
-     */
-    @GetMapping(value = "tag/{name}")
-    public String tags(HttpServletRequest request, @PathVariable String name, @RequestParam(value = "limit", defaultValue = "12") int limit) {
-        return this.tags(request, name, 1, limit);
-    }
-
-    /**
-     * 标签分页
-     *
-     * @param request
-     * @param name
-     * @param page
-     * @param limit
-     * @return
-     */
-    @GetMapping(value = "tag/{name}/{page}")
-    public String tags(HttpServletRequest request, @PathVariable String name, @PathVariable int page, @RequestParam(value = "limit", defaultValue = "12") int limit) {
-
-        page = page < 0 || page > WebConst.MAX_PAGE ? 1 : page;
-//        对于空格的特殊处理
-        name = name.replaceAll("\\+", " ");
-        MetaDto metaDto = metaService.getMeta(Types.TAG.getType(), name);
-        if (null == metaDto) {
-            return this.render_404();
-        }
-
-        PageInfo<ContentVo> contentsPaginator = contentService.getArticles(metaDto.getMid(), page, limit);
-        request.setAttribute("articles", contentsPaginator);
-        request.setAttribute("meta", metaDto);
-        request.setAttribute("type", "标签");
-        request.setAttribute("keyword", name);
-
-        return this.render("page-category");
     }
 
     /**

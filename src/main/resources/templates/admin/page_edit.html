@@ -5,7 +5,7 @@
 <link th:href="@{/admin/plugins/md/css/style.css}" rel="stylesheet"/>
 <body class="fixed-left">
 <div id="wrapper">
-    <div th:replace="admin/header::header-body"></div>
+    <div th:replace="admin/admin_header::header-body"></div>
     <div class="content-page">
         <div class="content">
             <div class="container">
@@ -14,9 +14,6 @@
                         <h4 class="page-title">
                             <th:block th:if="${null != contents}">
                                 编辑页面
-                            </th:block>
-                            <th:block th:unless="${null != contents}">
-                                发布新页面
                             </th:block>
                         </h4>
                     </div>
@@ -43,7 +40,6 @@
 
                             <div class="text-right">
                                 <button type="submit" class="btn btn-primary waves-effect waves-light">保存页面</button>
-                                <button type="submit" class="btn btn-warning waves-effect waves-light">存为草稿</button>
                             </div>
                         </form>
                     </div>

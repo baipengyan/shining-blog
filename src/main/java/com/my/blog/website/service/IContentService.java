@@ -96,4 +96,8 @@ public interface IContentService {
 	void updateTopic(ContentVo contents);
 
 	PageInfo<ContentVo> getContentsByUid(Integer p, Integer limit,Integer uid);
+
+	PageInfo<ContentVo> getContentsByHits(Integer p, Integer limit);
+
+	PageInfo<ContentVo> getTopic(Integer p, Integer limit);
 }

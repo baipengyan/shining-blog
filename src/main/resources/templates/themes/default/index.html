@@ -1,11 +1,12 @@
 <!doctype html>
-<htmllang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang ="en" xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>首页XXX个人博客</title>
+<title>Shing Blog</title>
 <meta name="keywords" content="个人博客,WEB学习,WEB学习博客,XXX个人博客" />
 <meta name="description" content="个人博客,WEB学习,WEB学习博客,XXX个人博客" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="shortcut icon" th:href="@{/user/img/favicon.png}"/>
 <link th:href="@{/user/css/basee.css}" rel="stylesheet">
 <link th:href="@{/user/css/m1.css}" rel="stylesheet">
 <link th:href="@{/user/css/index.css}" rel="stylesheet">
@@ -20,89 +21,118 @@
 <![endif]-->
 </head>
 <body>
-<header class="header-navigation" id="header">
-  <nav>
-    <div class="logo"><a href="http://www.17sucai.com">XXX个人博客</a></div>
-    <h2 id="mnavh"><span class="navicon"></span></h2>
-    <ul id="starlist">
-      <li><a href="index.html">首页</a></li>
-      <li><a th:href="@{/admin}">我的博客</a></li>
-	  <li><a th:href="@{/announ}">网站公告</a></li>
-    </ul>
-    <div class="searchbox">
-    <div id="search_bar" class="search_bar">
-      <form  id="searchform" name="searchform" onsubmit="return false;">
-        <input class="input" placeholder="想搜点什么呢.." type="text" id="search-inp">
-        <input type="hidden" name="show" value="title" />
-        <input type="hidden" name="tempid" value="1" />
-        <input type="hidden" name="tbname" value="news">
-        <input type="hidden" name="Submit" value="搜索" />
-        <p class="search_ico"> <span></span></p>
-      </form>
-     </div> 
-    </div>
-  </nav>
-</header>
-<article> 
-  <!--banner begin-->
-  <div class="banner">
-    <div id="banner" class="fader">
-      <li class="slide" ><a href="/" target="_blank"><img src="images/1.jpg"><span class="imginfo">轮播图一（支持组件化开发）</span></a></li>
-      <li class="slide" ><a href="/" target="_blank"><img src="images/2.jpg"><span class="imginfo">轮播图二（支持组件化开发）</span></a></li>
-      <div class="fader_controls">
-        <div class="page prev" data-target="prev">&lsaquo;</div>
-        <div class="page next" data-target="next">&rsaquo;</div>
-        <ul class="pager_list">
-        </ul>
-      </div>
-    </div>
-  </div>
-  <!--banner end-->
-  <div class="toppic">
-    <li> <a href="/" target="_blank"> <i><img src="images/1.jpg"></i>
-      <h2>爱设计</h2>
-      <span>学无止境</span> </a> </li>
-    <li> <a href="/" target="_blank"> <i><img src="images/2.jpg"></i>
-      <h2>个人博客</h2>
-      <span>学无止境</span> </a> </li>
-  </div>
-  <main>
-  <div class="blogtab">
-  <ul id="blogtab">
-    <li class="current">最新文章</li>
-  </ul> 
-    
-     <div class="blogs" data-scroll-reveal="enter bottom over 1s" th:each="article: ${articles.list}">
-      <h3 class="blogtitle"><a th:href="${commons.permalink(article)}" th:text="${article.title}" target="_blank"></a></h3>
-      <span class="blogpic"><a th:href="${commons.permalink(article)}" title=""><img th:src="@{${commons.show_thumb(article)}}" alt=""></a></span>
-      <p class="blogtext" th:text="${commons.intro(article.content,70)}">... </p>
-      <div class="bloginfo">
-        <ul>
-          <li class="author"><a th:href="${commons.permalink(article)}" th:text="${article.title}" ></a></li>
-          <li class="timer"><a th:text="${commons.fmtdate(article.created)}" ></a></li>
-          <li class="view"><a th:text="${article.hits}" ></a></li></li>
-          <li class="like">9999</li>
-        </ul>
-      </div>
-    </div>
-</div>
-  </main>
-  <aside class="r_box" >
-      <div class="fenlei">
-        <h2>文章分类</h2>
-        <ul>
-          <li><a href="/">学无止境（33）</a></li>
-          <li><a href="/">日记（19）</a></li>
-          <li><a href="/">慢生活（520）</a></li>
-          <li><a href="/">美文欣赏（40）</a></li>
-        </ul>
-      </div>
-  </aside>
-</article>
-<footer>
-  <p>Design by <a href="http://www.wbyweb.com" target="_blank">XXX个人博客</a> <a href="/">陕ICP备11002373号-1</a><a href="/" class="links">友情链接</a></p>
-</footer>
-<a href="#" class="cd-top">Top</a>
+	<header class="header-navigation" id="header">
+		<nav>
+			<div class="logo">
+				<a href="http://www.17sucai.com">Shining Blog</a>
+			</div>
+			<h2 id="mnavh">
+				<span class="navicon"></span>
+			</h2>
+			<ul id="starlist">
+				<li><a href="index.html">首页</a></li>
+				<li><a th:href="@{/admin}">我的博客</a></li>
+				<li><a th:href="@{/announ}">网站公告</a></li>
+			</ul>
+			<div class="searchbox">
+				<div id="search_bar" class="search_bar">
+					<form id="searchform" name="searchform" onsubmit="return false;">
+						<input class="input" placeholder="想搜点什么呢.." type="text"
+							id="search-inp"> <input type="hidden" name="show"
+							value="title" /> <input type="hidden" name="tempid" value="1" />
+						<input type="hidden" name="tbname" value="news"> <input
+							type="hidden" name="Submit" value="搜索" />
+						<p class="search_ico">
+							<span></span>
+						</p>
+					</form>
+				</div>
+			</div>
+		</nav>
+	</header>
+	<article>
+		<!--banner begin-->
+		<div class="banner">
+			<div id="banner" class="fader">
+				<li class="slide" th:each="hitArticles: ${hitArticles.list}"><a
+					th:href="${commons.permalink(hitArticles)}" target="_blank"><img
+						th:src="@{${commons.show_thumb(hitArticles)}}"><span
+						class="imginfo" th:href="${commons.permalink(hitArticles)}"
+						th:text="${hitArticles.title}" target="_blank"></span></a></li>
+
+
+				<!-- 				<li class="slide"><a href="/" target="_blank"><img -->
+				<!-- 						src="images/2.jpg"><span class="imginfo">轮播图二（支持组件化开发）</span></a></li> -->
+				<div class="fader_controls">
+					<div class="page prev" data-target="prev">&lsaquo;</div>
+					<div class="page next" data-target="next">&rsaquo;</div>
+					<ul class="pager_list">
+					</ul>
+				</div>
+			</div>
+		</div>
+		<!--banner end-->
+		<div class="toppic">
+			<li><a th:href="@{/hotHit}" target="_blank"> <i><img
+						th:src="@{/user/img/rand/18.jpg}"></i>
+					<h2>热门排行</h2> 
+			</a></li>
+			<li><a th:href="@{/topic}" target="_blank"> <i><img
+						th:src="@{/user/img/rand/19.jpg}"></i>
+					<h2>讨论区</h2> 
+			</a></li>
+		</div>
+		<main>
+		<div class="blogtab">
+			<ul id="blogtab">
+				<li class="current">最新文章</li>
+			</ul>
+
+			<div class="blogs" data-scroll-reveal="enter bottom over 1s"
+				th:each="article: ${articles.list}">
+				<h3 class="blogtitle">
+					<a th:href="${commons.permalink(article)}"
+						th:text="${article.title}" target="_blank"></a>
+				</h3>
+				<span class="blogpic"><a
+					th:href="${commons.permalink(article)}" title=""><img
+						th:src="@{${commons.show_thumb(article)}}" alt=""></a></span>
+				<p class="blogtext" th:text="${commons.intro(article.content,70)}">...
+				</p>
+				<div class="bloginfo">
+					<ul>
+						<li class="author"><a th:href="${commons.authlink(article)}"
+							>作者</a></li>
+						<li class="timer"><a
+							th:text="${commons.fmtdate(article.created)}"></a></li>
+						<li class="view"><a th:text="${article.hits}"></a></li>
+						</li>
+<!-- 						<li class="like">9999</li> -->
+					</ul>
+				</div>
+			</div>
+		</div>
+		</main>
+<!-- 		<aside class="r_box"> -->
+<!-- 			<div class="fenlei"> -->
+<!-- 				<h2>文章分类</h2> -->
+<!-- 				<ul> -->
+<!-- 					<li><a href="/">java开发</a></li> -->
+<!-- 					<li><a href="/">游戏开发</a></li> -->
+<!-- 					<li><a href="/">网站开发</a></li> -->
+<!-- 					<li><a href="/">日常文章</a></li> -->
+<!-- 					<li><a href="/">默认</a></li> -->
+<!-- 				</ul> -->
+<!-- 			</div> -->
+<!-- 		</aside> -->
+	</article>
+	<footer>
+		<p>
+			Design by <a href="http://www.wbyweb.com" target="_blank">XXX个人博客</a>
+			<a href="/">陕ICP备11002373号-1</a><a href="/" class="links">友情链接</a>
+		</p>
+	</footer>
+	<a href="#" class="cd-top">Top</a>
 
 	<script th:src="@{//cdn.bootcss.com/headroom/0.9.1/headroom.min.js}"></script>
 	<script

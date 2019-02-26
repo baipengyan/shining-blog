@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge, chrome=1"/>
+    <meta name="renderer" content="webkit"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+    <meta http-equiv="Cache-Control" content="no-transform"/>
+    <meta http-equiv="Cache-Control" content="no-siteapp"/>
+    <link rel="shortcut icon" th:href="@{/user/img/favicon.png}"/>
+    <title><th:block th:text="${title ?: '首页'}+' - '+${commons.site_option('site_title','My Blog')}"></th:block></title>
+    <link th:href="@{//cdn.bootcss.com/highlight.js/9.9.0/styles/xcode.min.css}" rel="stylesheet"/>
+    <link th:href="@{/user/css/style.min.css}" rel="stylesheet"/>
+    <script th:src="@{//cdn.bootcss.com/jquery/2.2.3/jquery.min.js}"></script>
+
+    <!--[if lt IE 9]>
+    <script src="//cdn.bootcss.com/html5shiv/r29/html5.min.js"></script>
+    <script src="//cdn.bootcss.com/respond.js/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+<header id="header" class="header bg-white">
+    <div class="navbar-container">
+        <a th:href="${commons.site_url('')}" class="navbar-logo">
+            <img th:src="@{/user/img/logo.png}" alt="首页"/>
+        </a>
+        <div class="navbar-search" onclick="">
+            <span class="icon-search"></span>
+            <form role="search" onsubmit="return false;">
+                <span class="search-box">
+                    <input type="text" id="search-inp" class="input" placeholder="搜索..." maxlength="30"
+                           autocomplete="off"/>
+                </span>
+            </form>
+        </div>
+    </div>
+</header>
+<div class="main-content index-page clearfix">
+    <div class="post-lists">
+        <div class="post-lists-body">
+            <div class="post-list-item" th:each="topic: ${topic.list}">
+                <div class="post-list-item-container">
+                    <a th:href="${commons.permalink(topic)}" class="item-thumb  bg-deepgrey"
+                       th:style="'background-image:url('+@{${commons.show_thumb(topic)}}+');'">
+                        <dir class="item-desc" th:text="${topic.tags}"></dir>
+                    </a>
+                    <div class="item-slant reverse-slant &lt; bg-deepgrey"></div>
+                    <div class="item-slant"></div>
+                    <div class="item-label">
+                        <div class="item-title"><a th:href="${commons.permalink(topic)}"
+                                                   th:text="${topic.title}"></a>
+                        </div>
+                        <div class="item-meta clearfix">
+                            <div th:class="'item-meta-ico '+ ${commons.show_icon(topic.cid)}"
+                                 th:style="'background: url('+@{/user/img/bg-ico.png}+');no-repeat;background-size: 40px auto;' "></div>
+                            <div class="item-meta-cat" th:utext="${commons.show_categories(topic.categories)}">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="lists-navigator clearfix">
+        <div th:replace="comm/macros::pageNav(${topic},'←','→','topic/page')"></div>
+    </div>
+</div>
+</body>
+<div th:replace="themes/default/footer::footer"></div>
+</html>

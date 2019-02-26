@@ -10,10 +10,12 @@ import com.my.blog.website.exception.TipException;
 import com.my.blog.website.modal.Bo.RestResponseBo;
 import com.my.blog.website.modal.Bo.StatisticsBo;
 import com.my.blog.website.modal.Vo.CommentVo;
+import com.my.blog.website.modal.Vo.CommentVoExample;
 import com.my.blog.website.modal.Vo.ContentVo;
 import com.my.blog.website.modal.Vo.ContentVoExample;
 import com.my.blog.website.modal.Vo.LogVo;
 import com.my.blog.website.modal.Vo.UserVo;
+import com.my.blog.website.service.ICommentService;
 import com.my.blog.website.service.IContentService;
 import com.my.blog.website.service.ILogService;
 import com.my.blog.website.service.IUserService;
@@ -53,6 +55,9 @@ public class IndexController extends BaseController {
     @Resource
     private IUserService userService;
 
+    @Resource
+    private ICommentService commentsService;
+    
     /**
      * 页面跳转
      * @return
@@ -63,12 +68,21 @@ public class IndexController extends BaseController {
     	UserVo user=(UserVo) request.getSession().getAttribute(WebConst.LOGIN_SESSION_KEY);
     	Integer authorId=user.getUid();
     	System.out.println("**************************"+authorId);
-    	ContentVoExample contentVoExample = new ContentVoExample();
-        contentVoExample.setOrderByClause("created desc");
-        contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(authorId);
-        PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample,page,limit);
-        request.setAttribute("articles", contentsPaginator);
-        return "admin/index";
+    	if(authorId==1) {
+    		CommentVoExample commentVoExample = new CommentVoExample();
+            commentVoExample.setOrderByClause("coid desc");
+            commentVoExample.createCriteria().andAuthorIdNotEqualTo(authorId).andTypeEqualTo("report");
+            PageInfo<CommentVo> commentsPaginator = commentsService.getCommentsWithPage(commentVoExample,page, limit);
+            request.setAttribute("comments", commentsPaginator);
+            return "admin/admin_index";
+    	}else {
+    		ContentVoExample contentVoExample = new ContentVoExample();
+            contentVoExample.setOrderByClause("created desc");
+            contentVoExample.createCriteria().andTypeEqualTo(Types.ARTICLE.getType()).andAuthorIdEqualTo(authorId);
+            PageInfo<ContentVo> contentsPaginator = contentsService.getArticlesWithpage(contentVoExample,page,limit);
+            request.setAttribute("articles", contentsPaginator);
+            return "admin/index";
+    	}
     }
 
     /**
@@ -157,5 +171,53 @@ public class IndexController extends BaseController {
             }
             return RestResponseBo.fail(msg);
         }
+    }
+    
+    /**
+     * 评论列表
+     * @param page
+     * @param limit
+     * @param request
+     * @return
+     */
+    @GetMapping(value = "/message")
+    public String message(@RequestParam(value = "page", defaultValue = "1") int page,
+                        @RequestParam(value = "limit", defaultValue = "3") int limit, HttpServletRequest request) {
+        UserVo users = this.user(request);
+        CommentVoExample commentVoExample = new CommentVoExample();
+        commentVoExample.setOrderByClause("coid desc");
+        commentVoExample.createCriteria().andAuthorIdEqualTo(users.getUid()).andTypeEqualTo("message");
+        PageInfo<CommentVo> commentsPaginator = commentsService.getCommentsWithPage(commentVoExample,page, limit);
+        request.setAttribute("comments", commentsPaginator);
+        return "admin/message_list";
+    }
+    
+    /**
+     * 删除一条评论
+     * @param coid
+     * @return
+     */
+    @PostMapping(value = "/report/delete")
+    @ResponseBody
+    @Transactional(rollbackFor = TipException.class)
+    public  RestResponseBo delete(@RequestParam Integer coid, @RequestParam Integer cid) {
+        try {
+            CommentVo comments = commentsService.getCommentById(coid);
+            if(null == comments){
+                return RestResponseBo.fail("不存在该举报");
+            } 
+            commentsService.delete(coid, comments.getCid());
+            contentsService.deleteByCid(cid);
+            
+        } catch (Exception e) {
+            String msg = "删除失败";
+            if (e instanceof TipException) {
+                msg = e.getMessage();
+            } else {
+                LOGGER.error(msg, e);
+            }
+            return RestResponseBo.fail(msg);
+        }
+        return RestResponseBo.ok();
     }
 }
